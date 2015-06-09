@@ -1,6 +1,7 @@
 #include "CochlearFilterbank.h"
 
 //#define DEBUG
+#define MULTITHREAD
 
 #ifdef DEBUG
 #include <iostream>
@@ -99,13 +100,21 @@ Eigen::VectorXd CochlearFilterbank::ERBspace(double low_freq, double high_freq, 
 Eigen::MatrixXd CochlearFilterbank::process(const Eigen::VectorXd &input, int n)
 {
 	Eigen::MatrixXd y(input.rows(), filters.size());
+#ifdef MULTITHREAD
 	vector<future<Eigen::VectorXd>> futures;
+#endif
 	for (unsigned int ch=0; ch < filters.size(); ch++)
-          futures.push_back(async(launch::async, &CochlearFilterbank::process_channel, this, input, n, ch));
+#ifdef MULTITHREAD
+          futures.push_back(async(launch::async, &CochlearFilterbank::process_channel_sample, this, input, n, ch));
+#else
+					y.col(ch) = process_channel(input, n, ch);
+#endif
+#ifdef MULTITHREAD
 	for (unsigned int ch=0; ch < filters.size(); ch++)
 	{
 		y.col(ch) = futures[ch].get();
 	}
+#endif
 	return y;
 }
 
@@ -121,4 +130,26 @@ Eigen::VectorXd CochlearFilterbank::process_channel(const Eigen::VectorXd &input
 		y3 = filters[ch][2].process(y2, n);
 		y4 = filters[ch][3].process(y3, n);
 		return y4;
+}
+
+Eigen::VectorXd CochlearFilterbank::process_channel_sample(const Eigen::VectorXd &input, int n, int ch)
+{
+	Eigen::VectorXd y(Eigen::VectorXd::Zero(input.rows()));
+
+	Eigen::VectorXd x1(Eigen::VectorXd::Zero(1));
+	Eigen::VectorXd y1(Eigen::VectorXd::Zero(1));
+	Eigen::VectorXd y2(Eigen::VectorXd::Zero(1));
+	Eigen::VectorXd y3(Eigen::VectorXd::Zero(1));
+	Eigen::VectorXd y4(Eigen::VectorXd::Zero(1));
+
+	for (unsigned int i=0; i < n; i++)
+	{
+		x1[0] = input[i];
+		y1 = filters[ch][0].process(x1, 1);
+		y2 = filters[ch][1].process(y1, 1);
+		y3 = filters[ch][2].process(y2, 1);
+		y4 = filters[ch][3].process(y3, 1);
+		y[i] = y4[0];
+	}
+	return y;
 }

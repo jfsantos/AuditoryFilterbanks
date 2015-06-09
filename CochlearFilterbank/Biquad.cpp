@@ -7,6 +7,8 @@ Biquad::Biquad(void)
 	a2 = 0.0;
 	b1 = 0.0;
 	b2 = 0.0;
+	z0 = 0.0;
+	z1 = 0.0;
 }
 
 
@@ -17,6 +19,8 @@ Biquad::Biquad(Eigen::Matrix<double, 5, 1> coeffs)
 	a2 = coeffs[2];
 	b1 = coeffs[3];
 	b2 = coeffs[4];
+	z0 = 0.0;
+	z1 = 0.0;
 }
 
 Eigen::Matrix<double, 5, 1> Biquad::coeffs()
@@ -34,7 +38,7 @@ Biquad::~Biquad(void)
 Eigen::VectorXd Biquad::process(const Eigen::VectorXd &x, int n)
 {
 	Eigen::VectorXd y(Eigen::VectorXd::Zero(x.rows()));
-	double xi, yi, z0 = 0, z1 = 0;
+	double xi, yi;
 	for (int i = 0; i < n ; ++i)
 	{
 		xi = x[i];

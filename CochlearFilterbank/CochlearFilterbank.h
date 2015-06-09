@@ -21,6 +21,8 @@ public:
 	// Methods
 	Eigen::MatrixXd process(const Eigen::VectorXd &input, int n);
 	Eigen::VectorXd process_channel(const Eigen::VectorXd &input, int n, int ch);
+	Eigen::VectorXd process_channel_sample(const Eigen::VectorXd &input, int n, int ch);
+
 	static Eigen::VectorXd ERBspace(double low_freq, double high_freq, int num_channels);
 	// Constants are defined on source file
 private:

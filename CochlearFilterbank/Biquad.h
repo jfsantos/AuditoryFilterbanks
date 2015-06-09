@@ -14,4 +14,5 @@ public:
 private:
 	double a0, a1, a2;
 	double b1, b2;
+	double z0, z1;
 };
