@@ -20,4 +20,3 @@ private:
 	std::vector<Biquad> filters;
 	std::vector<Biquad> makeModulationFilters(double fs, int num_channels, Eigen::VectorXd mf, double q);
 };
-

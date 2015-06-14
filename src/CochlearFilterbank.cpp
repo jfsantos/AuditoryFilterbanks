@@ -97,33 +97,38 @@ Eigen::VectorXd CochlearFilterbank::ERBspace(double low_freq, double high_freq, 
 	return cf_array;
 }
 
-Eigen::MatrixXd CochlearFilterbank::process(const Eigen::VectorXd &input, int n)
+vector<Eigen::VectorXd> CochlearFilterbank::process(const Eigen::VectorXd &input, unsigned int n)
 {
-	Eigen::MatrixXd y(input.rows(), filters.size());
+	vector<Eigen::VectorXd> out;
+	Eigen::VectorXd y;
 #ifdef MULTITHREAD
 	vector<future<Eigen::VectorXd>> futures;
 #endif
 	for (unsigned int ch=0; ch < filters.size(); ch++)
+	{
 #ifdef MULTITHREAD
-          futures.push_back(async(launch::async, &CochlearFilterbank::process_channel_sample, this, input, n, ch));
+        futures.push_back(async(launch::async, &CochlearFilterbank::process_channel_sample, this, input, n, ch));
 #else
-					y.col(ch) = process_channel(input, n, ch);
+		y = process_channel(input, n, ch);
+		out.push_back(y);
 #endif
+	}
 #ifdef MULTITHREAD
 	for (unsigned int ch=0; ch < filters.size(); ch++)
 	{
-		y.col(ch) = futures[ch].get();
+		y = futures[ch].get();
+		out.push_back(y);
 	}
 #endif
-	return y;
+	return out;
 }
 
 Eigen::VectorXd CochlearFilterbank::process_channel(const Eigen::VectorXd &input, int n, int ch)
 {
-		Eigen::VectorXd y1(Eigen::VectorXd::Zero(input.rows()));
-		Eigen::VectorXd y2(Eigen::VectorXd::Zero(input.rows()));
-		Eigen::VectorXd y3(Eigen::VectorXd::Zero(input.rows()));
-		Eigen::VectorXd y4(Eigen::VectorXd::Zero(input.rows()));
+		Eigen::VectorXd y1(input.rows());
+		Eigen::VectorXd y2(input.rows());
+		Eigen::VectorXd y3(input.rows());
+		Eigen::VectorXd y4(input.rows());
 
 		y1 = filters[ch][0].process(input, n);
 		y2 = filters[ch][1].process(y1, n);
@@ -132,15 +137,15 @@ Eigen::VectorXd CochlearFilterbank::process_channel(const Eigen::VectorXd &input
 		return y4;
 }
 
-Eigen::VectorXd CochlearFilterbank::process_channel_sample(const Eigen::VectorXd &input, int n, int ch)
+Eigen::VectorXd CochlearFilterbank::process_channel_sample(const Eigen::VectorXd &input, unsigned int n, unsigned int ch)
 {
 	Eigen::VectorXd y(Eigen::VectorXd::Zero(input.rows()));
 
-	Eigen::VectorXd x1(Eigen::VectorXd::Zero(1));
-	Eigen::VectorXd y1(Eigen::VectorXd::Zero(1));
-	Eigen::VectorXd y2(Eigen::VectorXd::Zero(1));
-	Eigen::VectorXd y3(Eigen::VectorXd::Zero(1));
-	Eigen::VectorXd y4(Eigen::VectorXd::Zero(1));
+	Eigen::VectorXd x1(1);
+	Eigen::VectorXd y1(1);
+	Eigen::VectorXd y2(1);
+	Eigen::VectorXd y3(1);
+	Eigen::VectorXd y4(1);
 
 	for (unsigned int i=0; i < n; i++)
 	{

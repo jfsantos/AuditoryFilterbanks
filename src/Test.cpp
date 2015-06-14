@@ -1,6 +1,7 @@
 #include "CochlearFilterbank.h"
 #include "ModulationFilterBank.h"
 #include <iostream>
+#include <vector>
 #include <eigen3/Eigen/Eigen>
 #include "timer.h"
 
@@ -21,7 +22,7 @@ int main()
 	x[0] = 1.0; // unit impulse
 
 	// Running filters
-	Eigen::MatrixXd y;
+	vector<Eigen::VectorXd> y;
     Timer tt;
     y = cf.process(x, N_SAMPLES);
 	double t = tt.elapsed();
@@ -33,7 +34,7 @@ int main()
 		sprintf(fname,"channel%d.txt",k+1);
 		FILE* f = fopen(fname,"w");
 		for (int n=0; n < N_SAMPLES; n++)
-			fprintf(f,"%e\n",y(n,k));
+			fprintf(f,"%e\n",y[k](n));
 		fclose(f);
 	}
 #endif
