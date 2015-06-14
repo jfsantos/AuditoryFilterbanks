@@ -11,13 +11,13 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 set(SOURCE_FILES
-    CochlearFilterbank/Biquad.cpp
-    CochlearFilterbank/Biquad.h
-    CochlearFilterbank/CochlearFilterbank.cpp
-    CochlearFilterbank/CochlearFilterbank.h
-    CochlearFilterbank/ModulationFilterBank.cpp
-    CochlearFilterbank/ModulationFilterBank.h
-    CochlearFilterbank/Test.cpp)
+    src/Biquad.cpp
+    src/Biquad.h
+    src/CochlearFilterbank.cpp
+    src/CochlearFilterbank.h
+    src/ModulationFilterBank.cpp
+    src/ModulationFilterBank.h
+    src/Test.cpp)
 
 add_executable(test_auditoryfilterbanks ${SOURCE_FILES})
 target_link_libraries(test_auditoryfilterbanks Threads::Threads)
