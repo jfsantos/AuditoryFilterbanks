@@ -7,7 +7,8 @@
 
 using namespace std;
 
-#define N_SAMPLES 8000*60*2
+#define DEBUG
+#define N_SAMPLES 8192
 
 int main()
 {
